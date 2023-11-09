@@ -19,16 +19,16 @@ class Hasher:
         hash_len: int
 
     NORMAL_HASHING_PRESET = ArgonHashingPreset(memory_cost=256*1024,
-                                             time_cost=15,
-                                             parallelism=8,
-                                             salt_len=128,
-                                             hash_len=128)
-
-    LIGHT_HASHING_PRESET = ArgonHashingPreset(memory_cost=128*1024,
-                                               time_cost=10,
-                                               parallelism=4,
+                                               time_cost=15,
+                                               parallelism=8,
                                                salt_len=128,
                                                hash_len=128)
+
+    LIGHT_HASHING_PRESET = ArgonHashingPreset(memory_cost=128*1024,
+                                              time_cost=10,
+                                              parallelism=4,
+                                              salt_len=128,
+                                              hash_len=128)
     
     def hash_with_argon2id(self, value: bytes, preset: 'ArgonHashingPreset', salt: bytes = None) -> str:
         '''Create hash with special or random salt with Argon2id protocol'''

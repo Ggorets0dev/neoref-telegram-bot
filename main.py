@@ -10,10 +10,10 @@ from aiogram.fsm.strategy import FSMStrategy
 
 from utils.config import Config
 
-from handlers import start, user, helph
+from handlers import start, add, helph
 
 
-__VERSION__ = '0.2.0'
+__VERSION__ = '0.3.0'
 
 
 # NOTE - Change logger settings
@@ -57,9 +57,11 @@ logger.success('Logged in Telegram')
 async def main_polling():
     '''Entry point of the application'''
     logger.warning("Bot is running in polling mode, it is recommended to use webhooks for stable connection")
-    dp.include_routers(start.router, user.router, helph.router)
+    dp.include_routers(start.router, helph.router, add.router)
     await dp.start_polling(bot, fsm_strategy=FSMStrategy.USER_IN_CHAT)
 
 
 if __name__ == '__main__':   
     asyncio.run(main_polling())
+
+# $argon2id$v=19$m=131072,t=10,p=4$h68ViZCap3xWIPpl7D7cMPjOHmrWRZpm+h29/aZ2Zpf4pmVJMBjf+ov1dIZaUoIvJbzlK7JyZC4/Q16uc6IkBAwqUpALySdBpaTtxeX+XoPZEQvMM2CZwkg0PdjB/Scd5IUSOox+0TL5xHTit6srpooBKAHiv52jX7Ni0yOwGTw$FnlMt+oU6Fvc5S3Zv9lS3d20NYygasWd74D8uWMviAHiagfPDULZpD0hyPdWRHTeSkyIqiRwbhrAXhv5BGCJ3roViUpSHjC9nt54qKMtloa4UKGMAN/iFK64x8o0eseZXWZ/Olb0WSPrWekj5nZs4XAKDhryKqJ8EuGIPByZdHY

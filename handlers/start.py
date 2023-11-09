@@ -23,5 +23,5 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer("Вы не являеетесь пользователем с правом доступа к данному программному обеспечению")
         return
 
-    await message.answer(BotReplicas.FAQ.value)
+    await message.answer(BotReplicas.GREETINGS.value)
     await state.set_state(ChooseUserFunctions.get_message)

@@ -32,21 +32,12 @@ class Config:
         with open(path, 'w', encoding='UTF-8') as file_write:
             yaml.dump(config, file_write, default_flow_style=False)
 
-    @staticmethod
-    def add(path: str, config: Dict[str, str | int | bool | List[Any]]) -> None:
-        '''Add data to the Yaml file or create it if it does not exist'''        
-        if os.path.isfile(path):
-            config.update(Config.get(path))
-        
-        Config.set(path, config)
-
-    @classmethod
-    def add_saved(cls, config: Dict[str, str | int | bool | List[Any]]) -> None:
-        '''Add data to the Yaml file or create it if it does not exist'''        
-        if os.path.isfile(cls.path):
-            config.update(cls.get(cls.path))
-        
-        cls.set(cls.path, config)
+    @classmethod   
+    def set_saved(cls, config: Dict[str, str | int | bool | List[Any]]) -> None:
+        '''Save config to saved path'''
+        if not cls.path:
+            raise ValueError("Configuration file path is not saved")
+        return cls.set(cls.path, config)
 
     @classmethod
     def save_path(cls, path: str) -> None:
