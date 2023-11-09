@@ -1,7 +1,7 @@
 '''Config class location'''
 
 import os
-from typing import Dict
+from typing import Any, Dict, List
 import yaml
 
 
@@ -11,7 +11,7 @@ class Config:
     path = None
     
     @staticmethod
-    def get(path: str) -> Dict[str, str | int | bool]:
+    def get(path: str) -> Dict[str, str | int | bool | List[Any]]:
         '''Function to retrieve a configuration file'''
         if not os.path.isfile(path):
             return
@@ -20,25 +20,33 @@ class Config:
             return yaml.load(file_read, Loader=yaml.FullLoader)
         
     @classmethod
-    def get_saved(cls) -> Dict[str, str | int | bool]:
+    def get_saved(cls) -> Dict[str, str | int | bool | List[Any]]:
         '''Get the configuration file whose path is saved'''
         if not cls.path:
             raise ValueError("Configuration file path is not saved")
         return cls.get(cls.path)
         
     @staticmethod   
-    def set(path: str, config: Dict[str, str | int | bool]) -> None:
+    def set(path: str, config: Dict[str, str | int | bool | List[Any]]) -> None:
         '''Function to save a configuration file'''
         with open(path, 'w', encoding='UTF-8') as file_write:
             yaml.dump(config, file_write, default_flow_style=False)
 
     @staticmethod
-    def add(path: str, config: Dict[str, str | int | bool]) -> None:
+    def add(path: str, config: Dict[str, str | int | bool | List[Any]]) -> None:
         '''Add data to the Yaml file or create it if it does not exist'''        
         if os.path.isfile(path):
             config.update(Config.get(path))
         
         Config.set(path, config)
+
+    @classmethod
+    def add_saved(cls, config: Dict[str, str | int | bool | List[Any]]) -> None:
+        '''Add data to the Yaml file or create it if it does not exist'''        
+        if os.path.isfile(cls.path):
+            config.update(cls.get(cls.path))
+        
+        cls.set(cls.path, config)
 
     @classmethod
     def save_path(cls, path: str) -> None:
