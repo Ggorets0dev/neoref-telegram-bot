@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from models.telegram.bot_replicas import BotReplicas
-from models.telegram.state import ChooseUserFunctions
+from models.telegram.state import ChooseUserFunctions, ChooseAdminFunctions
 from utils.telegram import determine_admin_rights, make_row_keyboard, determine_user_rights
 
 router = Router() 
@@ -17,11 +17,12 @@ async def cmd_start(message: Message, state: FSMContext):
 
     if determine_admin_rights(USER_ID):
         await message.answer("Вы определены как администратор", reply_markup=make_row_keyboard(['Запуск']))
+        await state.set_state(ChooseUserFunctions.get_message)
     elif determine_user_rights(USER_ID):
         await message.answer("Вы определены как пользователь", reply_markup=make_row_keyboard(['Запуск']))
+        await state.set_state(ChooseAdminFunctions.get_message)
     else:
         await message.answer("Вы не являеетесь пользователем с правом доступа к данному программному обеспечению")
         return
 
     await message.answer(BotReplicas.GREETINGS.value)
-    await state.set_state(ChooseUserFunctions.get_message)

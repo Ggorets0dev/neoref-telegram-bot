@@ -12,10 +12,12 @@ def make_row_keyboard(items: List[str]) -> ReplyKeyboardMarkup:
     row = [KeyboardButton(text=item) for item in items]
     return ReplyKeyboardMarkup(keyboard=[row], resize_keyboard=True, input_field_placeholder='Выберите действие')
 
+
 def make_column_keyboard(items: List[str]) -> ReplyKeyboardMarkup:
     '''Make keyborad with one column'''
     column = [[KeyboardButton(text=item)] for item in items]
     return ReplyKeyboardMarkup(keyboard=column, resize_keyboard=True, input_field_placeholder='Выберите действие')
+
 
 def determine_admin_rights(user_id: int) -> bool:
     '''Check if the user has administrator rights'''
@@ -23,13 +25,16 @@ def determine_admin_rights(user_id: int) -> bool:
     ADMIN_IDS = CONFIG.get('admin_ids') or list()
     HASHER = Hasher()
 
+    user_id = str(user_id).encode()
+
     is_admin = False
     for ID in ADMIN_IDS:
-        if HASHER.verify_hash(value=str(user_id).encode(), value_hash=ID.encode()):
+        if HASHER.verify_hash(value=user_id, value_hash=ID.encode()):
             is_admin = True
             break
 
     return is_admin
+
 
 def determine_user_rights(user_id: int) -> bool:
     '''Check if user is in accepted users'''
@@ -37,9 +42,11 @@ def determine_user_rights(user_id: int) -> bool:
     USER_IDS = CONFIG.get('user_ids') or list()
     HASHER = Hasher()
 
+    user_id = str(user_id).encode()
+
     is_user = False
     for ID in USER_IDS:
-        if HASHER.verify_hash(value=str(user_id).encode(), value_hash=ID.encode()):
+        if HASHER.verify_hash(value=user_id, value_hash=ID.encode()):
             is_user = True
             break
 
