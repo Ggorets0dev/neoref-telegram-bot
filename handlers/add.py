@@ -3,10 +3,8 @@
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
-from models.hasher import Hasher
 from models.telegram.state import ChooseAdminFunctions
-from utils.access import add_admin
-from utils.config import Config
+from utils.access import add_admin, add_user, check_access
 
 router = Router()
 
@@ -20,6 +18,11 @@ async def addadmin_cmd(message: Message):
         return
     
     USER_ID: str = MSG_PARTS[-1]
+    
+    if check_access(USER_ID):
+        await message.answer("Данный пользователь уже имеет доступ, первым делом отключите его")
+        return
+    
     add_admin(USER_ID)
 
     await message.answer(f"Администратор с ID {USER_ID} успешно добавлен")
@@ -35,6 +38,11 @@ async def adduser_cmd(message: Message):
         return
     
     USER_ID: str = MSG_PARTS[-1]
+
+    if check_access(USER_ID):
+        await message.answer("Данный пользователь уже имеет доступ, первым делом отключите его")
+        return
+
     add_user(USER_ID)
     
     await message.answer(f"Пользователь с ID {USER_ID} успешно добавлен")

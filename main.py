@@ -13,7 +13,7 @@ from utils.config import Config
 from handlers import start, add, helph
 
 
-__VERSION__ = '0.4.0'
+__VERSION__ = '0.5.0'
 
 
 # NOTE - Change logger settings
