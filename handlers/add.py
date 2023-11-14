@@ -3,7 +3,7 @@
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
-from models.telegram.state import ChooseAdminFunctions
+from models.telegram.state import ChooseAdminFunctions, ChooseUserFunctions
 from utils.access import add_admin, add_user, check_access
 
 router = Router()
@@ -46,3 +46,14 @@ async def adduser_cmd(message: Message):
     add_user(USER_ID)
     
     await message.answer(f"Пользователь с ID {USER_ID} успешно добавлен")
+
+@router.message(ChooseUserFunctions.get_message, Command("addadmin"))
+async def addadmin_cmd_forbidden(message: Message):
+    '''Send to user message that functionality is blocked'''
+    await message.answer("Вы не являетесь администратором")
+
+@router.message(ChooseUserFunctions.get_message, Command("adduser"))
+async def adduser_cmd_forbidden(message: Message):
+    '''Send to user message that functionality is blocked'''
+    await message.answer("Вы не являетесь администратором")
+    

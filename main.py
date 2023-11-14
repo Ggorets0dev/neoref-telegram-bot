@@ -7,13 +7,14 @@ from loguru import logger
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.strategy import FSMStrategy
+from models.gpt import ChatGpt
 
 from utils.config import Config
 
-from handlers import start, add, helph
+from handlers import start, add, helph, context, conversation
 
 
-__VERSION__ = '0.5.0'
+__VERSION__ = '0.6.0'
 
 
 # NOTE - Change logger settings
@@ -43,22 +44,41 @@ else:
 
 
 # SECTION - Sign in to Telegram
-TOKEN = os.environ.get('TELEGRAM_TOKEN')
+TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 
-if not TOKEN:
+if not TELEGRAM_TOKEN:
     logger.error('Token for accessing Telegram was not found in the environment variables')
     exit(1)
 
-bot = Bot(token=TOKEN)
+logger.info("Trying to access Telegram using provided bot token...")
+
+bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 logger.success('Logged in Telegram')
 # !SECTION
 
 
+# SECTION - Check OpenAI API
+OPENAI_KEY = os.environ.get('OPENAI_API_KEY')
+
+if not OPENAI_KEY:
+    logger.error('Token for accessing OpenAI was not found in the environment variables')
+    exit(1)
+
+logger.info("Trying to access ChatGPT using provided API key...")
+
+if ChatGpt.check_api_key(OPENAI_KEY):
+    ChatGpt.set_api_key(OPENAI_KEY)
+    logger.success('OpenAI API key is valid')
+else:
+    logger.error('OpenAI key is invalid')
+    exit(1)
+# !SECTION
+
 async def main_polling():
     '''Entry point of the application'''
     logger.warning("Bot is running in polling mode, it is recommended to use webhooks for stable connection")
-    dp.include_routers(start.router, helph.router, add.router)
+    dp.include_routers(start.router, helph.router, add.router, context.router, conversation.router)
     await dp.start_polling(bot, fsm_strategy=FSMStrategy.USER_IN_CHAT)
 
 
