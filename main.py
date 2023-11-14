@@ -7,14 +7,15 @@ from loguru import logger
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.strategy import FSMStrategy
+from aiogram.methods import DeleteWebhook
 from models.gpt import ChatGpt
 
 from utils.config import Config
 
-from handlers import start, add, helph, context, conversation
+from handlers import start, add, helph, delh, context, conversation
 
 
-__VERSION__ = '0.6.0'
+__VERSION__ = '0.7.0'
 
 
 # NOTE - Change logger settings
@@ -22,10 +23,12 @@ logger.add('logs/bot.log', rotation='256 MB')
 
 
 # SECTION - Checking config
+CONFIG = None
 CONFIG_PATH = 'config.yaml'
 
 if os.path.isfile(CONFIG_PATH) and Config.get(CONFIG_PATH).get('admin_ids') is not None:
     Config.save_path(CONFIG_PATH)
+    CONFIG = Config.get_saved()
     logger.success('Path to the config saved')
 else:
     logger.error('Config file was not detected or there are no ids of bot admins')
@@ -47,7 +50,7 @@ else:
 TELEGRAM_TOKEN = os.environ.get('TELEGRAM_TOKEN')
 
 if not TELEGRAM_TOKEN:
-    logger.error('Token for accessing Telegram was not found in the environment variables')
+    logger.error('Key for accessing Telegram was not found in the environment variables')
     exit(1)
 
 logger.info("Trying to access Telegram using provided bot token...")
@@ -60,16 +63,32 @@ logger.success('Logged in Telegram')
 
 # SECTION - Check OpenAI API
 OPENAI_KEY = os.environ.get('OPENAI_API_KEY')
+MAX_TOKENS = CONFIG.get('chat_max_tokens')
+MODEL = CONFIG.get('chat_model')
+CHECK_TIMOUT, ASK_TIMEOUT = CONFIG.get('chat_check_timeout'), CONFIG.get('chat_ask_timeout')
 
 if not OPENAI_KEY:
     logger.error('Token for accessing OpenAI was not found in the environment variables')
     exit(1)
+elif not MAX_TOKENS:
+    logger.error('Tokens limit for ChatGPT was not found in the configuration file')
+    exit(1)
+elif not MODEL:
+    logger.error('Model for ChatGPT was not found in the configuration file')
+    exit(1)
+elif not CHECK_TIMOUT or not ASK_TIMEOUT:
+    logger.error('Maximum response time from ChatGPT is not defined in the configuration file')
+    exit(1)
 
 logger.info("Trying to access ChatGPT using provided API key...")
 
-if ChatGpt.check_api_key(OPENAI_KEY):
-    ChatGpt.set_api_key(OPENAI_KEY)
-    logger.success('OpenAI API key is valid')
+ChatGpt.set_api_key(OPENAI_KEY)
+ChatGpt.set_max_tokens(int(MAX_TOKENS))
+ChatGpt.set_model(MODEL)
+ChatGpt.set_timeouts(CHECK_TIMOUT, ASK_TIMEOUT)
+
+if ChatGpt.check_api_key(OPENAI_KEY, tries_cnt=5):
+    logger.success('OpenAI API key is valid, settings for ChatGPT are set')
 else:
     logger.error('OpenAI key is invalid')
     exit(1)
@@ -78,7 +97,8 @@ else:
 async def main_polling():
     '''Entry point of the application'''
     logger.warning("Bot is running in polling mode, it is recommended to use webhooks for stable connection")
-    dp.include_routers(start.router, helph.router, add.router, context.router, conversation.router)
+    dp.include_routers(start.router, helph.router, add.router, delh.router, context.router, conversation.router)
+    await bot(DeleteWebhook(drop_pending_updates=True))
     await dp.start_polling(bot, fsm_strategy=FSMStrategy.USER_IN_CHAT)
 
 

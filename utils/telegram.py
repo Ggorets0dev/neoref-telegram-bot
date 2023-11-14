@@ -7,16 +7,16 @@ from models.hasher import Hasher
 from utils.config import Config
 
 
-def make_row_keyboard(items: List[str]) -> ReplyKeyboardMarkup:
+def make_row_keyboard(items: List[str], input_field_placeholder: str = 'Выбор') -> ReplyKeyboardMarkup:
     '''Make keyboard with one row'''
     row = [KeyboardButton(text=item) for item in items]
-    return ReplyKeyboardMarkup(keyboard=[row], resize_keyboard=True, input_field_placeholder='Выберите действие')
+    return ReplyKeyboardMarkup(keyboard=[row], resize_keyboard=True, input_field_placeholder=input_field_placeholder)
 
 
-def make_column_keyboard(items: List[str]) -> ReplyKeyboardMarkup:
+def make_column_keyboard(items: List[str], input_field_placeholder: str = 'Выбор') -> ReplyKeyboardMarkup:
     '''Make keyborad with one column'''
     column = [[KeyboardButton(text=item)] for item in items]
-    return ReplyKeyboardMarkup(keyboard=column, resize_keyboard=True, input_field_placeholder='Выберите действие')
+    return ReplyKeyboardMarkup(keyboard=column, resize_keyboard=True, input_field_placeholder=input_field_placeholder)
 
 
 def determine_admin_rights(user_id: int) -> bool:

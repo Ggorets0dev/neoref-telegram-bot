@@ -10,4 +10,4 @@ router = Router()
 @router.message(Command("help"))
 async def help_cmd(message: Message):
     '''Show bot information for user'''
-    await message.answer(BotReplicas.HELP.value)
+    await message.answer(BotReplicas.HELP.value, parse_mode='HTML')

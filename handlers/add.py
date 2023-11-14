@@ -3,6 +3,7 @@
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.filters import Command
+from loguru import logger
 from models.telegram.state import ChooseAdminFunctions, ChooseUserFunctions
 from utils.access import add_admin, add_user, check_access
 
@@ -21,6 +22,7 @@ async def addadmin_cmd(message: Message):
     
     if check_access(USER_ID):
         await message.answer("Данный пользователь уже имеет доступ, первым делом отключите его")
+        logger.error(f"Access with ID {USER_ID} is already in group, remove it first")
         return
     
     add_admin(USER_ID)
@@ -41,6 +43,7 @@ async def adduser_cmd(message: Message):
 
     if check_access(USER_ID):
         await message.answer("Данный пользователь уже имеет доступ, первым делом отключите его")
+        logger.error(f"Access with ID {USER_ID} is already in group, remove it first")
         return
 
     add_user(USER_ID)

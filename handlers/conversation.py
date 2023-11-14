@@ -1,5 +1,8 @@
 '''Handlers for user queries to ChatPGTt'''
 
+from loguru import logger
+import openai
+
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -24,13 +27,18 @@ async def ask_chat_gpt(message: Message, state: FSMContext):
     else:
         conversation = None
 
-    print(conversation)
-
     await message.answer("Запрос отправлен")
     
-    RESPONSE = ChatGpt.ask(QUERY, conversation)
-    
-    await message.answer(RESPONSE.last_msg)
+    try:
+        RESPONSE = ChatGpt.ask(QUERY, conversation)
 
-    if IS_REMEMBER_CONTEXT is True:
-        await state.update_data(conversation_context=RESPONSE.conversation)
+    except openai.APITimeoutError:
+        await message.answer("Не удалось получить ответ от модели в отведенный срок, пожалуйста, повторите запрос")
+        logger.error(f"For the user with ID {message.from_user.id} failed to execute the request within the allotted period")
+    
+    else:
+        await message.answer(RESPONSE.last_msg)
+        logger.info(f"For the user with ID {message.from_user.id} a response was sent to the request")
+
+        if IS_REMEMBER_CONTEXT is True:
+            await state.update_data(conversation_context=RESPONSE.conversation)

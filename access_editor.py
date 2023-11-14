@@ -39,7 +39,6 @@ def main() -> None:
             return logger.error(f"Access with ID {USER_ID} is already in group, remove it first")
 
         add_admin(USER_ID)
-        logger.success(f"Admin with ID {USER_ID} added successfully")
 
     elif ARGS.add_user:
         USER_ID = str(ARGS.add_user[0])
@@ -48,16 +47,10 @@ def main() -> None:
             return logger.error(f"Access with ID {USER_ID} is already in group, remove it first")
         
         add_user(USER_ID)
-        logger.success(f"User with ID {USER_ID} added successfully")
 
     elif ARGS.delete:
         USER_ID = str(ARGS.delete[0])
-        status = del_access(USER_ID)
-
-        if status:
-            logger.success(f"Access with ID {USER_ID} deleted successfully")
-        else:
-            logger.info(f"Access with ID {USER_ID} not found")
+        del_access(USER_ID)
 
     else:
         logger.error("No arguments provided for access editor")
