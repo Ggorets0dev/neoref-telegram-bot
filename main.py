@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import openai
 from dotenv import load_dotenv
 from loguru import logger
 from aiogram import Bot, Dispatcher
@@ -15,7 +16,7 @@ from utils.config import Config
 from handlers import start, add, helph, delh, context, conversation
 
 
-__VERSION__ = '0.7.0'
+__VERSION__ = '0.7.1'
 
 
 # NOTE - Change logger settings
@@ -87,11 +88,19 @@ ChatGpt.set_max_tokens(int(MAX_TOKENS))
 ChatGpt.set_model(MODEL)
 ChatGpt.set_timeouts(CHECK_TIMOUT, ASK_TIMEOUT)
 
-if ChatGpt.check_api_key(OPENAI_KEY, tries_cnt=5):
-    logger.success('OpenAI API key is valid, settings for ChatGPT are set')
-else:
-    logger.error('OpenAI key is invalid')
+try:
+    API_KEY_VALIDATION = ChatGpt.check_api_key(OPENAI_KEY, tries_cnt=5)
+
+except openai.PermissionDeniedError:
+    logger.error('Failed to connect to OpenAI server, access blocked')
     exit(1)
+
+else:
+    if API_KEY_VALIDATION:
+        logger.success('OpenAI API key is valid, settings for ChatGPT are set')
+    else:
+        logger.error('OpenAI key is invalid')
+        exit(1)
 # !SECTION
 
 async def main_polling():
