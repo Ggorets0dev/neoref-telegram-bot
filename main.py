@@ -16,7 +16,7 @@ from utils.config import Config
 from handlers import start, add, helph, delh, context, conversation
 
 
-__VERSION__ = '0.7.1'
+__VERSION__ = '0.8.0'
 
 
 # NOTE - Change logger settings
@@ -92,7 +92,7 @@ try:
     API_KEY_VALIDATION = ChatGpt.check_api_key(OPENAI_KEY, tries_cnt=5)
 
 except openai.PermissionDeniedError:
-    logger.error('Failed to connect to OpenAI server, access blocked')
+    logger.error('Failed to connect to OpenAI server, permission denied')
     exit(1)
 
 else:
