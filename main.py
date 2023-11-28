@@ -9,14 +9,16 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.strategy import FSMStrategy
 from aiogram.methods import DeleteWebhook
+
 from models.gpt import ChatGpt
+from models.query_queue import QueryQueue
 
 from utils.config import Config
 
-from handlers import start, add, helph, delh, context, conversation
+from handlers import start, add, helph, delh, queue, context, info, conversation
 
 
-__VERSION__ = '0.8.0'
+__VERSION__ = '1.0.0'
 
 
 # NOTE - Change logger settings
@@ -67,6 +69,7 @@ OPENAI_KEY = os.environ.get('OPENAI_API_KEY')
 MAX_TOKENS = CONFIG.get('chat_max_tokens')
 MODEL = CONFIG.get('chat_model')
 CHECK_TIMOUT, ASK_TIMEOUT = CONFIG.get('chat_check_timeout'), CONFIG.get('chat_ask_timeout')
+QUERY_LIMIT = CONFIG.get('query_max_count')
 
 if not OPENAI_KEY:
     logger.error('Token for accessing OpenAI was not found in the environment variables')
@@ -80,6 +83,12 @@ elif not MODEL:
 elif not CHECK_TIMOUT or not ASK_TIMEOUT:
     logger.error('Maximum response time from ChatGPT is not defined in the configuration file')
     exit(1)
+elif not CHECK_TIMOUT or not ASK_TIMEOUT:
+    logger.error('Maximum response time from ChatGPT is not defined in the configuration file')
+    exit(1)
+elif not QUERY_LIMIT:
+    logger.error('No limit on simultaneous requests detected in the configuration file')
+    exit(1)
 
 logger.info("Trying to access ChatGPT using provided API key...")
 
@@ -87,6 +96,7 @@ ChatGpt.set_api_key(OPENAI_KEY)
 ChatGpt.set_max_tokens(int(MAX_TOKENS))
 ChatGpt.set_model(MODEL)
 ChatGpt.set_timeouts(CHECK_TIMOUT, ASK_TIMEOUT)
+QueryQueue.set_query_limit(QUERY_LIMIT)
 
 try:
     API_KEY_VALIDATION = ChatGpt.check_api_key(OPENAI_KEY, tries_cnt=5)
@@ -106,7 +116,7 @@ else:
 async def main_polling():
     '''Entry point of the application'''
     logger.warning("Bot is running in polling mode, it is recommended to use webhooks for stable connection")
-    dp.include_routers(start.router, helph.router, add.router, delh.router, context.router, conversation.router)
+    dp.include_routers(start.router, helph.router, add.router, delh.router, context.router, queue.router, info.router, conversation.router)
     await bot(DeleteWebhook(drop_pending_updates=True))
     await dp.start_polling(bot, fsm_strategy=FSMStrategy.USER_IN_CHAT)
 

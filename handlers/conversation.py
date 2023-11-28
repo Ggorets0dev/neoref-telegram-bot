@@ -11,10 +11,11 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from models.gpt import ChatGpt
+from models.query_queue import QueryQueue
 from models.telegram.state import ChooseAdminFunctions, ChooseUserFunctions
 
 
-user_ids_in_progress = list()
+query_queue = QueryQueue()
 
 router = Router()
 
@@ -42,16 +43,21 @@ async def ask_chat_gpt(message: Message, state: FSMContext):
                 asyncio.run_coroutine_threadsafe(STATE.update_data(conversation_context=RESPONSE.conversation), LOOP)
 
         finally:
-            user_ids_in_progress.remove(USER_ID)
+            query_queue.delete_query(USER_ID)
 
     QUERY = message.text
     USER_ID = message.from_user.id
     
-    if USER_ID in user_ids_in_progress:
-        await message.answer("Один запрос от Вас уже находится в работе, пожалуйста, ожидайте ответа")
+    if query_queue.is_full():
+        await message.answer("Количество запросов к боту достигло лимита, повторите запрос позже")
         return
+
+    elif query_queue.is_in_progress(USER_ID):
+        await message.answer("Запрос от Вас уже обрабатывается, ожидайте ответа")
+        return
+
     else:
-        user_ids_in_progress.append(USER_ID)
+        query_queue.add_query(USER_ID, QUERY)
 
     BOT = message.bot
     LOOP = asyncio.get_event_loop()

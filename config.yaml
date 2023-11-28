@@ -3,4 +3,5 @@ chat_ask_timeout: 60
 chat_check_timeout: 10
 chat_max_tokens: 300
 chat_model: gpt-3.5-turbo
+query_max_count: 3
 user_ids: []
